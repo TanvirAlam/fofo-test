@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Production
+build/
+dist/
+out/
+
+# ML Models
+models/tts
+models/tts/bark-small/pytorch_model.bin
+
+# Misc
+.DS_Store
+*.pem
+.env*
+!.env.example
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.mp3

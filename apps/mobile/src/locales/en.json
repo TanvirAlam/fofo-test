@@ -1,0 +1,22 @@
+{
+  "welcome": "Welcome",
+  "changeLanguage": "Change Language",
+  "loginTitle": "Login to Foodime",
+  "forgotPassword": "Forgot Password?",
+  "dashboard": "Dashboard",
+  "noAccount": "Don’t have an account? Register",
+  "loginButton": "Login",
+  "rememberMe": "Remember Me",
+  "goToRegister": "Go to Register",
+  "register": {
+    "title": "Create Your Account",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phonePlaceholder": "1234-5678",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "createAccount": "Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "login": "Login"
+  }
+}

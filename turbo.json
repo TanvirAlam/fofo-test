@@ -1,0 +1,50 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env":["NODE_ENV"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "src/**/*.test.*", "src/**/*.spec.*", "src/__tests__/**/*", "__tests__/**/*", "tests/**/*"],
+      "outputs": ["coverage/**", "test-results/**", "*.xml"]
+    },
+    "test:unit": {
+      "inputs": ["$TURBO_DEFAULT$", "src/**/*.test.*", "src/**/*.spec.*", "src/__tests__/**/*"],
+      "outputs": ["coverage/**"]
+    },
+    "test:integration": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "src/**/*.integration.*", "src/**/*.e2e.*"],
+      "outputs": ["coverage/**", "test-results/**"]
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "e2e/**/*", "cypress/**/*", "playwright/**/*"],
+      "outputs": ["test-results/**", "videos/**", "screenshots/**"]
+    },
+    "test:coverage": {
+      "dependsOn": ["test"],
+      "outputs": ["coverage/**"]
+    },
+    "test:ci": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "src/**/*.test.*", "src/**/*.spec.*", "src/__tests__/**/*"],
+      "outputs": ["coverage/**", "test-results/**", "*.xml"]
+    }
+  }
+}

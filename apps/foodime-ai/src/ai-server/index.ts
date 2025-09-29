@@ -1,0 +1,109 @@
+import express from 'express';
+import cors from 'cors';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import config from '../config';
+import { ttsAdapter } from './services/ttsAdapter';
+
+const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: [
+      'http://localhost:3000',  // web
+      'http://localhost:19000', // mobile - expo
+      'http://localhost:8000',  // server
+    ],
+    methods: ['GET', 'POST']
+  }
+});
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+// TTS endpoints
+app.post('/api/tts/test', async (req, res) => {
+  try {
+    const { provider, voiceId, text } = req.body;
+    if (!process.env.ELEVENLABS_API_KEY) {
+      throw new Error('ELEVENLABS_API_KEY is not set');
+    }
+    const result = await ttsAdapter.testVoice(provider, voiceId, text);
+    
+    if (result.success && result.audioData) {
+      res.set('Content-Type', 'audio/mpeg');
+      res.send(Buffer.from(result.audioData));
+    } else {
+      res.status(500).json(result);
+    }
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+});
+
+app.get('/api/tts/voices', async (req, res) => {
+  try {
+    const { provider } = req.query;
+    if (typeof provider !== 'string') {
+      throw new Error('Provider must be specified');
+    }
+    const voices = await ttsAdapter.getAvailableVoices(provider);
+    res.json({ voices });
+  } catch (error) {
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+});
+
+// Socket.IO event handlers
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+
+  socket.on('tts:initialize', async () => {
+    try {
+      await ttsAdapter.initialize();
+      socket.emit('tts:initialized', { success: true });
+    } catch (error) {
+      socket.emit('tts:initialized', { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  socket.on('tts:test', async (data) => {
+    try {
+      const result = await ttsAdapter.testVoice(
+        data.provider,
+        data.voiceId,
+        data.text
+      );
+      socket.emit('tts:test:result', result);
+    } catch (error) {
+      socket.emit('tts:test:result', {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+
+const PORT = config.port;
+
+httpServer.listen(PORT, () => {
+  console.log(`🚀 AI Service running on port ${PORT}`);
+});

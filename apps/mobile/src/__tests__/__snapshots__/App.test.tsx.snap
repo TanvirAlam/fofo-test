@@ -1,0 +1,807 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`App matches snapshot 1`] = `
+[
+  <NavigationContainer>
+    <Navigator
+      initialRouteName="Home"
+    >
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "padding": 20,
+            }
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "color": "rgba(255, 255, 255, 1)",
+                  "fontFamily": "Poppins_Bold",
+                  "fontSize": 28,
+                },
+                {
+                  "color": "rgba(51, 51, 51, 1)",
+                  "marginBottom": 10,
+                  "textAlign": "center",
+                },
+              ]
+            }
+          >
+            Welcome to Foodime!
+          </Text>
+          <Text
+            style={
+              [
+                {
+                  "color": "rgba(255, 255, 255, 1)",
+                  "fontFamily": "Poppins_Bold",
+                  "fontSize": 18,
+                },
+                {
+                  "color": "rgba(158, 158, 158, 1)",
+                  "marginBottom": 20,
+                  "textAlign": "center",
+                },
+              ]
+            }
+          >
+            Your mobile app is ready
+          </Text>
+          <Text
+            style={
+              [
+                {
+                  "color": "rgba(255, 255, 255, 1)",
+                  "fontFamily": "Poppins_Regular",
+                  "fontSize": 16,
+                },
+                {
+                  "color": "rgba(68, 68, 68, 1)",
+                  "lineHeight": 24,
+                  "marginBottom": 30,
+                  "textAlign": "center",
+                },
+              ]
+            }
+          >
+            This is your React Native app with Expo, integrated into the Foodime monorepo.
+          </Text>
+          <View
+            style={
+              {
+                "alignSelf": "stretch",
+                "backgroundColor": "rgba(245, 245, 245, 1)",
+                "borderRadius": 10,
+                "padding": 20,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "color": "rgba(255, 255, 255, 1)",
+                    "fontFamily": "Poppins_Bold",
+                    "fontSize": 18,
+                  },
+                  {
+                    "color": "rgba(51, 51, 51, 1)",
+                    "marginBottom": 15,
+                  },
+                ]
+              }
+            >
+              Features included:
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "color": "rgba(255, 255, 255, 1)",
+                    "fontFamily": "Poppins_Regular",
+                    "fontSize": 16,
+                  },
+                  {
+                    "color": "rgba(68, 68, 68, 1)",
+                    "lineHeight": 22,
+                    "marginBottom": 8,
+                  },
+                ]
+              }
+            >
+              • React Navigation
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "color": "rgba(255, 255, 255, 1)",
+                    "fontFamily": "Poppins_Regular",
+                    "fontSize": 16,
+                  },
+                  {
+                    "color": "rgba(68, 68, 68, 1)",
+                    "lineHeight": 22,
+                    "marginBottom": 8,
+                  },
+                ]
+              }
+            >
+              • Safe Area handling
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "color": "rgba(255, 255, 255, 1)",
+                    "fontFamily": "Poppins_Regular",
+                    "fontSize": 16,
+                  },
+                  {
+                    "color": "rgba(68, 68, 68, 1)",
+                    "lineHeight": 22,
+                    "marginBottom": 8,
+                  },
+                ]
+              }
+            >
+              • TypeScript support
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "color": "rgba(255, 255, 255, 1)",
+                    "fontFamily": "Poppins_Regular",
+                    "fontSize": 16,
+                  },
+                  {
+                    "color": "rgba(68, 68, 68, 1)",
+                    "lineHeight": 22,
+                    "marginBottom": 8,
+                  },
+                ]
+              }
+            >
+              • ESLint configuration
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "color": "rgba(255, 255, 255, 1)",
+                    "fontFamily": "Poppins_Regular",
+                    "fontSize": 16,
+                  },
+                  {
+                    "color": "rgba(68, 68, 68, 1)",
+                    "lineHeight": 22,
+                    "marginBottom": 8,
+                  },
+                ]
+              }
+            >
+              • Shared UI components
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "color": "rgba(255, 255, 255, 1)",
+                    "fontFamily": "Poppins_Regular",
+                    "fontSize": 16,
+                  },
+                  {
+                    "color": "rgba(68, 68, 68, 1)",
+                    "lineHeight": 22,
+                    "marginBottom": 8,
+                  },
+                ]
+              }
+            >
+              • Monorepo integration
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={[Function]}
+            style={
+              {
+                "backgroundColor": "rgba(0, 122, 255, 1)",
+                "borderRadius": 25,
+                "elevation": 5,
+                "marginTop": 30,
+                "paddingHorizontal": 30,
+                "paddingVertical": 15,
+                "shadowColor": "rgba(0, 0, 0, 1)",
+                "shadowOffset": {
+                  "height": 2,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.25,
+                "shadowRadius": 3.84,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "color": "rgba(255, 255, 255, 1)",
+                    "fontFamily": "Poppins_Bold",
+                    "fontSize": 18,
+                  },
+                  {
+                    "color": "rgba(255, 255, 255, 1)",
+                    "fontSize": 18,
+                    "fontWeight": "600",
+                    "textAlign": "center",
+                  },
+                ]
+              }
+            >
+              Test App 🚀
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={[Function]}
+            style={
+              {
+                "backgroundColor": "rgba(0, 122, 255, 1)",
+                "borderRadius": 25,
+                "elevation": 5,
+                "marginTop": 30,
+                "paddingHorizontal": 30,
+                "paddingVertical": 15,
+                "shadowColor": "rgba(0, 0, 0, 1)",
+                "shadowOffset": {
+                  "height": 2,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.25,
+                "shadowRadius": 3.84,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "color": "rgba(255, 255, 255, 1)",
+                    "fontFamily": "Poppins_Bold",
+                    "fontSize": 18,
+                  },
+                  {
+                    "color": "rgba(255, 255, 255, 1)",
+                    "fontSize": 18,
+                    "fontWeight": "600",
+                    "textAlign": "center",
+                  },
+                ]
+              }
+            >
+              goToRegister
+            </Text>
+          </TouchableOpacity>
+          <View
+            style={
+              {
+                "margin": 30,
+                "textAlign": "center",
+              }
+            }
+          >
+            <Button
+              onPress={[Function]}
+              title="changeLanguage"
+            />
+          </View>
+        </View>
+      </ScrollView>
+      <View>
+        <Text />
+      </View>
+      <View>
+        <Text />
+      </View>
+      <ScrollView
+        contentContainerStyle={
+          {
+            "height": "100%",
+            "justifyContent": "flex-start",
+            "marginTop": 60,
+            "width": "100%",
+          }
+        }
+        keyboardShouldPersistTaps="handled"
+        overScrollMode="never"
+        showsVerticalScrollIndicator={false}
+      >
+        <Text
+          style={
+            {
+              "color": "#1a1a1a",
+              "fontSize": 28,
+              "fontWeight": "700",
+              "letterSpacing": -0.5,
+              "lineHeight": 34,
+              "marginBottom": 20,
+              "textAlign": "center",
+            }
+          }
+        >
+          register.title
+        </Text>
+        <TextInput
+          autoCapitalize="words"
+          autoComplete="name"
+          autoCorrect={false}
+          keyboardType="default"
+          onChangeText={[Function]}
+          placeholder="register.fullName"
+          placeholderTextColor="#6c757d"
+          returnKeyType="next"
+          style={
+            {
+              "backgroundColor": "#f8f9fa",
+              "borderColor": "#e1e5e9",
+              "borderRadius": 12,
+              "borderWidth": 1.5,
+              "elevation": 2,
+              "fontSize": 16,
+              "marginVertical": 10,
+              "paddingHorizontal": 16,
+              "paddingVertical": 12,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.05,
+              "shadowRadius": 3,
+            }
+          }
+          value=""
+        />
+        <TextInput
+          autoCapitalize="none"
+          autoComplete="email"
+          autoCorrect={false}
+          keyboardType="email-address"
+          onChangeText={[Function]}
+          placeholder="register.email"
+          placeholderTextColor="#6c757d"
+          returnKeyType="next"
+          style={
+            {
+              "backgroundColor": "#f8f9fa",
+              "borderColor": "#e1e5e9",
+              "borderRadius": 12,
+              "borderWidth": 1.5,
+              "elevation": 2,
+              "fontSize": 16,
+              "marginVertical": 10,
+              "paddingHorizontal": 16,
+              "paddingVertical": 12,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.05,
+              "shadowRadius": 3,
+            }
+          }
+          value=""
+        />
+        <TextInput
+          autoCapitalize="words"
+          autoComplete="tel"
+          autoCorrect={false}
+          keyboardType="numeric"
+          maxLength={9}
+          onChangeText={[Function]}
+          placeholder="+45 XX XX XX XX"
+          placeholderTextColor="#6c757d"
+          returnKeyType="next"
+          style={
+            {
+              "backgroundColor": "#f8f9fa",
+              "borderColor": "#e1e5e9",
+              "borderRadius": 12,
+              "borderWidth": 1.5,
+              "elevation": 2,
+              "fontSize": 16,
+              "marginVertical": 10,
+              "paddingHorizontal": 16,
+              "paddingVertical": 12,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.05,
+              "shadowRadius": 3,
+            }
+          }
+          value=""
+        />
+        <TextInput
+          autoCapitalize="words"
+          autoComplete="password"
+          autoCorrect={false}
+          keyboardType="default"
+          onChangeText={[Function]}
+          placeholder="register.password"
+          placeholderTextColor="#6c757d"
+          returnKeyType="next"
+          secureTextEntry={true}
+          style={
+            {
+              "backgroundColor": "#f8f9fa",
+              "borderColor": "#e1e5e9",
+              "borderRadius": 12,
+              "borderWidth": 1.5,
+              "elevation": 2,
+              "fontSize": 16,
+              "marginVertical": 10,
+              "paddingHorizontal": 16,
+              "paddingVertical": 12,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.05,
+              "shadowRadius": 3,
+            }
+          }
+          value=""
+        />
+        <TextInput
+          autoCapitalize="words"
+          autoComplete="password"
+          autoCorrect={false}
+          keyboardType="default"
+          onChangeText={[Function]}
+          placeholder="register.confirmPassword"
+          placeholderTextColor="#6c757d"
+          returnKeyType="done"
+          secureTextEntry={true}
+          style={
+            {
+              "backgroundColor": "#f8f9fa",
+              "borderColor": "#e1e5e9",
+              "borderRadius": 12,
+              "borderWidth": 1.5,
+              "elevation": 2,
+              "fontSize": 16,
+              "marginVertical": 10,
+              "paddingHorizontal": 16,
+              "paddingVertical": 12,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.05,
+              "shadowRadius": 3,
+            }
+          }
+          value=""
+        />
+        <TouchableOpacity
+          activeOpacity={0.8}
+          disabled={false}
+          onPress={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#007AFF",
+                "borderRadius": 14,
+                "elevation": 6,
+                "marginVertical": 20,
+                "paddingHorizontal": 20,
+                "paddingVertical": 14,
+                "shadowColor": "#007AFF",
+                "shadowOffset": {
+                  "height": 4,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.3,
+                "shadowRadius": 8,
+              },
+              false,
+            ]
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#ffffff",
+                "fontSize": 18,
+                "fontWeight": "700",
+                "letterSpacing": 0.5,
+              }
+            }
+          >
+            register.createAccount
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={[Function]}
+        >
+          <Text
+            style={
+              {
+                "color": "#007AFF",
+                "fontSize": 16,
+                "fontWeight": "500",
+                "marginBottom": 0,
+                "marginTop": 10,
+                "textAlign": "center",
+              }
+            }
+          >
+            register.alreadyHaveAccount
+             
+            register.login
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+      <View
+        style={
+          {
+            "height": "100%",
+            "justifyContent": "flex-start",
+            "marginTop": 60,
+            "width": "100%",
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "color": "rgba(255, 255, 255, 1)",
+                "fontFamily": "Poppins_Bold",
+                "fontSize": 28,
+              },
+              {
+                "color": "rgba(0, 0, 0, 1)",
+                "fontWeight": "700",
+                "lineHeight": 34,
+                "marginBottom": 20,
+                "textAlign": "center",
+              },
+            ]
+          }
+        >
+          loginTitle
+        </Text>
+        <TextInput
+          autoCapitalize="words"
+          autoComplete="email"
+          autoCorrect={false}
+          keyboardType="default"
+          onChangeText={[Function]}
+          placeholder="Email or Phone"
+          placeholderTextColor="#6c757d"
+          returnKeyType="next"
+          style={
+            {
+              "backgroundColor": "#f8f9fa",
+              "borderColor": "#e1e5e9",
+              "borderRadius": 12,
+              "borderWidth": 1.5,
+              "elevation": 2,
+              "fontSize": 16,
+              "marginVertical": 10,
+              "paddingHorizontal": 16,
+              "paddingVertical": 12,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.05,
+              "shadowRadius": 3,
+            }
+          }
+          value=""
+        />
+        <View
+          style={
+            {
+              "position": "relative",
+            }
+          }
+        >
+          <TextInput
+            autoCapitalize="words"
+            autoComplete="password"
+            autoCorrect={false}
+            keyboardType="default"
+            onChangeText={[Function]}
+            placeholder="Password"
+            placeholderTextColor="#6c757d"
+            returnKeyType="done"
+            secureTextEntry={true}
+            style={
+              {
+                "backgroundColor": "#f8f9fa",
+                "borderColor": "#e1e5e9",
+                "borderRadius": 12,
+                "borderWidth": 1.5,
+                "elevation": 2,
+                "fontSize": 16,
+                "marginVertical": 10,
+                "paddingHorizontal": 16,
+                "paddingVertical": 12,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 3,
+              }
+            }
+            value=""
+          />
+          <TouchableOpacity
+            onPress={[Function]}
+            style={
+              {
+                "position": "absolute",
+                "right": 15,
+                "top": 25,
+              }
+            }
+          >
+            <Text
+              color="rgba(158, 158, 158, 1)"
+              name="visibility"
+              size={20}
+              testID="mock-MaterialIcons-icon"
+            >
+              MockIcon-MaterialIcons
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          onPress={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "marginTop": 10,
+            }
+          }
+        >
+          <Text
+            color="rgba(0, 122, 255, 1)"
+            name="check-box-outline-blank"
+            size={20}
+            testID="mock-MaterialIcons-icon"
+          >
+            MockIcon-MaterialIcons
+          </Text>
+          <Text
+            style={
+              [
+                {
+                  "color": "rgba(255, 255, 255, 1)",
+                  "fontFamily": "Poppins_SemiBold",
+                  "fontSize": 14,
+                },
+                {
+                  "color": "rgba(0, 0, 0, 1)",
+                  "marginLeft": 8,
+                },
+              ]
+            }
+          >
+            rememberMe
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={[Function]}
+        >
+          <Text
+            style={
+              [
+                {
+                  "color": "rgba(255, 255, 255, 1)",
+                  "fontFamily": "Poppins_Regular",
+                  "fontSize": 14,
+                },
+                {
+                  "color": "rgba(0, 122, 255, 1)",
+                  "fontWeight": "500",
+                  "marginBottom": 0,
+                  "marginTop": 10,
+                  "textAlign": "center",
+                },
+              ]
+            }
+          >
+            forgotPassword
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          disabled={false}
+          onPress={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(0, 122, 255, 1)",
+                "borderRadius": 14,
+                "elevation": 6,
+                "marginVertical": 20,
+                "paddingHorizontal": 20,
+                "paddingVertical": 14,
+                "shadowColor": "rgba(0, 122, 255, 1)",
+                "shadowOffset": {
+                  "height": 4,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.3,
+                "shadowRadius": 8,
+              },
+              false,
+            ]
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "rgba(255, 255, 255, 1)",
+                "fontFamily": "Poppins_SemiBold",
+                "fontSize": 16,
+              }
+            }
+          >
+            loginButton
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={[Function]}
+        >
+          <Text
+            style={
+              [
+                {
+                  "color": "rgba(255, 255, 255, 1)",
+                  "fontFamily": "Poppins_Regular",
+                  "fontSize": 16,
+                },
+                {
+                  "color": "rgba(0, 122, 255, 1)",
+                  "fontWeight": "500",
+                  "marginBottom": 0,
+                  "marginTop": 10,
+                  "textAlign": "center",
+                },
+              ]
+            }
+          >
+            noAccount
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </Navigator>
+  </NavigationContainer>,
+  <StatusBar
+    style="auto"
+  />,
+]
+`;

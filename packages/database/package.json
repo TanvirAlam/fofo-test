@@ -1,0 +1,24 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push --skip-generate"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.7"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
+    "eslint": "^9.27.0",
+    "typescript": "^5.1.6"
+  }
+}

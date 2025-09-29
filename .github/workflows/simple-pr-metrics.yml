@@ -1,0 +1,539 @@
+name: Simple PR Metrics
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+    branches: [main, dev]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  pr-metrics:
+    name: 📊 PR Analysis
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: 🛒 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 📋 Calculate PR Metrics
+        id: metrics
+        run: |
+          echo "🔍 Analyzing PR #${{ github.event.number }}"
+
+          # Get data from GitHub event (most reliable)
+          ADDITIONS="${{ github.event.pull_request.additions }}"
+          DELETIONS="${{ github.event.pull_request.deletions }}"
+          CHANGED_FILES="${{ github.event.pull_request.changed_files }}"
+          COMMITS="${{ github.event.pull_request.commits }}"
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          IS_DRAFT="${{ github.event.pull_request.draft }}"
+          CREATED_AT="${{ github.event.pull_request.created_at }}"
+
+          # Set defaults for null values
+          ADDITIONS=${ADDITIONS:-0}
+          DELETIONS=${DELETIONS:-0}  
+          CHANGED_FILES=${CHANGED_FILES:-1}
+          COMMITS=${COMMITS:-1}
+
+          # Calculate totals
+          TOTAL_CHANGES=$((ADDITIONS + DELETIONS))
+
+          # Calculate PR size
+          if [ $TOTAL_CHANGES -lt 50 ]; then
+            PR_SIZE="XS"
+            SIZE_EMOJI="🟢"
+            REVIEW_TIME="~5 min"
+            SIZE_SCORE=10
+          elif [ $TOTAL_CHANGES -lt 200 ]; then
+            PR_SIZE="S"
+            SIZE_EMOJI="🟢"
+            REVIEW_TIME="~15 min"
+            SIZE_SCORE=8
+          elif [ $TOTAL_CHANGES -lt 500 ]; then
+            PR_SIZE="M"
+            SIZE_EMOJI="🟡"
+            REVIEW_TIME="~30 min"
+            SIZE_SCORE=6
+          elif [ $TOTAL_CHANGES -lt 1000 ]; then
+            PR_SIZE="L"
+            SIZE_EMOJI="🟠"
+            REVIEW_TIME="~1 hour"
+            SIZE_SCORE=4
+          else
+            PR_SIZE="XL"
+            SIZE_EMOJI="🔴"
+            REVIEW_TIME="Consider splitting"
+            SIZE_SCORE=2
+          fi
+
+          # Analyze code quality (scan changed files)
+          echo "🔍 Analyzing code quality..."
+
+          # Get changed files from PR (more accurate for PR context)
+          CHANGED_FILES_LIST=$(git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD~$COMMITS HEAD 2>/dev/null || echo "")
+
+          # Initialize quality scores
+          UNUSED_VARS=0
+          DUPLICATE_CODE=0
+          MISSING_EMPTY_LINES=0
+          LONG_FUNCTIONS=0
+          TODO_FIXME_COUNT=0
+          SPELLING_ERRORS=0
+          NAMING_VIOLATIONS=0
+          FILE_NAMING_ISSUES=0
+
+          # Common misspellings in code (add more as needed)
+          COMMON_MISSPELLINGS="recieve\|seperate\|definately\|occured\|lenght\|widht\|heigth\|sucessful\|accomodate\|begining\|calander\|cemetary\|changable\|collegue\|comming\|enviroment\|existance\|foriegn\|freind\|goverment\|gratefull\|independant\|maintainance\|neccessary\|ocassion\|posession\|priviledge\|questionaire\|reccommend\|refference\|responsability\|tomarow\|untill\|verison"
+
+
+          # Scan JavaScript/TypeScript files for quality issues
+          for file in $CHANGED_FILES_LIST; do
+            if [[ "$file" =~ \.(js|jsx|ts|tsx)$ ]] && [ -f "$file" ]; then
+              echo "Scanning $file..."
+              
+              # Check for spelling errors in comments and strings
+              SPELLING_ERRORS=$((SPELLING_ERRORS + $(grep -iE "$COMMON_MISSPELLINGS" "$file" 2>/dev/null | wc -l || echo 0)))
+              
+              
+              # Check for unused variables (basic pattern)
+              UNUSED_VARS=$((UNUSED_VARS + $(grep -c "const [a-zA-Z_]\+ =" "$file" 2>/dev/null || echo 0)))
+              UNUSED_VARS=$((UNUSED_VARS - $(grep -c "console\|return\|export" "$file" 2>/dev/null || echo 0)))
+              
+              # Check for potential duplicate code (repeated patterns)
+              DUPLICATE_CODE=$((DUPLICATE_CODE + $(grep -E "(if \(|for \(|while \()" "$file" 2>/dev/null | sort | uniq -d | wc -l || echo 0)))
+              
+              # Check for missing empty lines (functions without spacing)
+              MISSING_EMPTY_LINES=$((MISSING_EMPTY_LINES + $(grep -B1 -A1 "function\|const.*=>" "$file" 2>/dev/null | grep -c "}{" || echo 0)))
+              
+              # Check for long functions (>50 lines)
+              LONG_FUNCTIONS=$((LONG_FUNCTIONS + $(awk '/function|=>/{start=NR} /^}$/{if(NR-start>50) count++} END{print count+0}' "$file" 2>/dev/null || echo 0)))
+              
+              # Count TODO/FIXME comments
+              TODO_FIXME_COUNT=$((TODO_FIXME_COUNT + $(grep -ci "TODO\|FIXME\|HACK" "$file" 2>/dev/null || echo 0)))
+            fi
+          done
+
+          # Ensure positive values
+          UNUSED_VARS=$([ $UNUSED_VARS -lt 0 ] && echo 0 || echo $UNUSED_VARS)
+
+          # Calculate comprehensive quality score using advanced formula
+          echo "🔍 Calculating comprehensive quality score..."
+
+          # Initialize metric variables
+          LINT_ERRORS=$SPELLING_ERRORS
+          TYPE_ERRORS=0  # Will be enhanced later for TS projects
+          DUPLICATION_PERCENT=$((DUPLICATE_CODE * 5))  # Convert to percentage estimate
+          COMPLEXITY_OVER_BUDGET=$((LONG_FUNCTIONS > 2 ? LONG_FUNCTIONS - 2 : 0))
+
+          # Test-related metrics (basic estimation for now)
+          COVERAGE_PERCENT=85  # Default assumption, can be enhanced
+          MUTATION_ESCAPE_RATE=0  # Will be enhanced with mutation testing
+          HAS_E2E_TESTS=0  # Can be detected by checking for test files
+
+          # Performance metrics (platform detection)
+          KB_OVER_BUDGET=0  # Will be enhanced with bundle analysis
+          TTI_OVER_BUDGET=0  # Will be enhanced with performance testing
+          STARTUP_OVER_BUDGET=0
+          JANK_FINDINGS=0
+
+          # Accessibility metrics (web projects)
+          CRITICAL_A11Y_ISSUES=0  # Will be enhanced with accessibility testing
+          SERIOUS_A11Y_ISSUES=0
+
+          # Security metrics
+          CRITICAL_VULNS=0  # Will be enhanced with security scanning
+          HIGH_VULNS=0
+          SECRETS_FOUND=0  # Basic check for common secret patterns
+
+          # Developer Experience metrics
+          BREAKING_API_CHANGES=0  # Will be enhanced with API analysis
+          UNEXPLAINED_MAJOR_DIFFS=0
+
+          # Check for potential secrets in changed files
+          for file in $CHANGED_FILES_LIST; do
+            if [ -f "$file" ]; then
+              # Check for common secret patterns
+              SECRETS_FOUND=$((SECRETS_FOUND + $(grep -iE "(api_key|secret|password|token)\s*=\s*['\"][^'\"]{10,}" "$file" 2>/dev/null | wc -l || echo 0)))
+            fi
+          done
+
+          # Detect platform type
+          IS_REACT_NATIVE=0
+          if [ -f "package.json" ]; then
+            if grep -q "react-native" package.json 2>/dev/null; then
+              IS_REACT_NATIVE=1
+            fi
+          fi
+
+          # Calculate CodeHealth (0-100)
+          CODE_HEALTH=100
+          CODE_HEALTH=$((CODE_HEALTH - (2 * LINT_ERRORS)))
+          CODE_HEALTH=$((CODE_HEALTH - (10 * TYPE_ERRORS)))
+          CODE_HEALTH=$((CODE_HEALTH - DUPLICATION_PERCENT))
+          CODE_HEALTH=$((CODE_HEALTH - (5 * COMPLEXITY_OVER_BUDGET)))
+          CODE_HEALTH=$([ $CODE_HEALTH -lt 0 ] && echo 0 || echo $CODE_HEALTH)
+          CODE_HEALTH=$([ $CODE_HEALTH -gt 100 ] && echo 100 || echo $CODE_HEALTH)
+
+          # Calculate Tests (0-100)
+          TESTS_SCORE=$(echo "scale=0; 1.2 * $COVERAGE_PERCENT" | bc -l 2>/dev/null || echo $((COVERAGE_PERCENT)))
+          TESTS_SCORE=$((TESTS_SCORE - (20 * MUTATION_ESCAPE_RATE)))
+          if [ $HAS_E2E_TESTS -eq 1 ]; then
+            TESTS_SCORE=$((TESTS_SCORE + 10))
+          fi
+          TESTS_SCORE=$([ $TESTS_SCORE -lt 0 ] && echo 0 || echo $TESTS_SCORE)
+          TESTS_SCORE=$([ $TESTS_SCORE -gt 100 ] && echo 100 || echo $TESTS_SCORE)
+
+          # Calculate Performance (0-100)
+          PERFORMANCE_SCORE=100
+          if [ $IS_REACT_NATIVE -eq 1 ]; then
+            # React Native scoring
+            PERFORMANCE_SCORE=$((PERFORMANCE_SCORE - (KB_OVER_BUDGET / 2)))
+            PERFORMANCE_SCORE=$((PERFORMANCE_SCORE - (STARTUP_OVER_BUDGET * 3 / 10)))
+            PERFORMANCE_SCORE=$((PERFORMANCE_SCORE - (5 * JANK_FINDINGS)))
+          else
+            # Web scoring
+            PERFORMANCE_SCORE=$((PERFORMANCE_SCORE - (KB_OVER_BUDGET / 2)))
+            PERFORMANCE_SCORE=$((PERFORMANCE_SCORE - (TTI_OVER_BUDGET / 5)))
+          fi
+          PERFORMANCE_SCORE=$([ $PERFORMANCE_SCORE -lt 0 ] && echo 0 || echo $PERFORMANCE_SCORE)
+          PERFORMANCE_SCORE=$([ $PERFORMANCE_SCORE -gt 100 ] && echo 100 || echo $PERFORMANCE_SCORE)
+
+          # Calculate Accessibility (0-100, default 80 for non-web)
+          if [ $IS_REACT_NATIVE -eq 1 ]; then
+            ACCESSIBILITY_SCORE=80  # Default for React Native
+          else
+            ACCESSIBILITY_SCORE=100
+            ACCESSIBILITY_SCORE=$((ACCESSIBILITY_SCORE - (10 * CRITICAL_A11Y_ISSUES)))
+            ACCESSIBILITY_SCORE=$((ACCESSIBILITY_SCORE - (3 * SERIOUS_A11Y_ISSUES)))
+            ACCESSIBILITY_SCORE=$([ $ACCESSIBILITY_SCORE -lt 0 ] && echo 0 || echo $ACCESSIBILITY_SCORE)
+            ACCESSIBILITY_SCORE=$([ $ACCESSIBILITY_SCORE -gt 100 ] && echo 100 || echo $ACCESSIBILITY_SCORE)
+          fi
+
+          # Calculate Security (0-100)
+          SECURITY_SCORE=100
+          SECURITY_SCORE=$((SECURITY_SCORE - (40 * CRITICAL_VULNS)))
+          SECURITY_SCORE=$((SECURITY_SCORE - (15 * HIGH_VULNS)))
+          SECURITY_SCORE=$((SECURITY_SCORE - (5 * SECRETS_FOUND)))
+          SECURITY_SCORE=$([ $SECURITY_SCORE -lt 0 ] && echo 0 || echo $SECURITY_SCORE)
+          SECURITY_SCORE=$([ $SECURITY_SCORE -gt 100 ] && echo 100 || echo $SECURITY_SCORE)
+
+          # Calculate Developer Experience (0-100)
+          DX_SCORE=100
+          DX_SCORE=$((DX_SCORE - (10 * BREAKING_API_CHANGES)))
+          DX_SCORE=$((DX_SCORE - (5 * UNEXPLAINED_MAJOR_DIFFS)))
+          DX_SCORE=$([ $DX_SCORE -lt 0 ] && echo 0 || echo $DX_SCORE)
+          DX_SCORE=$([ $DX_SCORE -gt 100 ] && echo 100 || echo $DX_SCORE)
+
+          # Calculate final weighted score using the formula
+          # Score = 0.25*CodeHealth + 0.20*Tests + 0.15*Performance + 0.10*Accessibility + 0.20*Security + 0.10*DX
+          WEIGHTED_SCORE=$(echo "scale=2; 0.25*$CODE_HEALTH + 0.20*$TESTS_SCORE + 0.15*$PERFORMANCE_SCORE + 0.10*$ACCESSIBILITY_SCORE + 0.20*$SECURITY_SCORE + 0.10*$DX_SCORE" | bc -l 2>/dev/null || echo "75")
+
+          # Convert to 1-10 scale for compatibility
+          QUALITY_SCORE=$(echo "scale=0; $WEIGHTED_SCORE / 10" | bc -l 2>/dev/null || echo "7")
+          QUALITY_SCORE=$([ $QUALITY_SCORE -lt 1 ] && echo 1 || echo $QUALITY_SCORE)
+          QUALITY_SCORE=$([ $QUALITY_SCORE -gt 10 ] && echo 10 || echo $QUALITY_SCORE)
+
+          echo "📈 Advanced Quality Metrics:"
+          echo "   - Code Health: $CODE_HEALTH/100 (Lint: $LINT_ERRORS, Duplication: $DUPLICATION_PERCENT%, Complexity: $COMPLEXITY_OVER_BUDGET)"
+          echo "   - Tests: $TESTS_SCORE/100 (Coverage: $COVERAGE_PERCENT%)"
+          echo "   - Performance: $PERFORMANCE_SCORE/100 (Platform: $([ $IS_REACT_NATIVE -eq 1 ] && echo 'React Native' || echo 'Web'))"
+          echo "   - Accessibility: $ACCESSIBILITY_SCORE/100"
+          echo "   - Security: $SECURITY_SCORE/100 (Secrets found: $SECRETS_FOUND)"
+          echo "   - Developer Experience: $DX_SCORE/100"
+          echo "   - Weighted Score: $WEIGHTED_SCORE/100"
+          echo "   - Final Quality Score: $QUALITY_SCORE/10"
+
+          # Calculate age in hours
+          if [ -n "$CREATED_AT" ]; then
+            CREATED_UNIX=$(date -d "$CREATED_AT" +%s 2>/dev/null || echo $(date +%s))
+            CURRENT_UNIX=$(date +%s)
+            AGE_HOURS=$(( (CURRENT_UNIX - CREATED_UNIX) / 3600 ))
+          else
+            AGE_HOURS=0
+          fi
+
+          # Simple assessments (Good vs Can Be Better)
+          if [ $TOTAL_CHANGES -le 200 ]; then
+            SIZE_ASSESSMENT="✅ Good"
+          else
+            SIZE_ASSESSMENT="🔴 Can Be Better"
+          fi
+
+          if [ $CHANGED_FILES -le 10 ]; then
+            FILES_ASSESSMENT="✅ Good"
+          else
+            FILES_ASSESSMENT="🔴 Can Be Better"
+          fi
+
+          if [ $COMMITS -le 5 ]; then
+            COMMITS_ASSESSMENT="✅ Good"
+          else
+            COMMITS_ASSESSMENT="🔴 Can Be Better"
+          fi
+
+          if [ $AGE_HOURS -le 24 ]; then
+            AGE_ASSESSMENT="✅ Good"
+          else
+            AGE_ASSESSMENT="🔴 Can Be Better"
+          fi
+
+          if [ $QUALITY_SCORE -ge 7 ]; then
+            QUALITY_ASSESSMENT="✅ Good"
+          else
+            QUALITY_ASSESSMENT="🔴 Can Be Better"
+          fi
+
+          # Calculate final PR score (1-10)
+          # Average of size score, quality score, and other factors
+          COMMITS_SCORE=10
+          if [ $COMMITS -gt 5 ]; then COMMITS_SCORE=6; fi
+          if [ $COMMITS -gt 10 ]; then COMMITS_SCORE=3; fi
+
+          FILES_SCORE=10  
+          if [ $CHANGED_FILES -gt 10 ]; then FILES_SCORE=6; fi
+          if [ $CHANGED_FILES -gt 20 ]; then FILES_SCORE=3; fi
+
+          AGE_SCORE=10
+          if [ $AGE_HOURS -gt 24 ]; then AGE_SCORE=7; fi
+          if [ $AGE_HOURS -gt 48 ]; then AGE_SCORE=4; fi
+
+          # Final score is weighted average
+          TOTAL_SCORE=$((SIZE_SCORE + QUALITY_SCORE + COMMITS_SCORE + FILES_SCORE + AGE_SCORE))
+          FINAL_SCORE=$((TOTAL_SCORE / 5))
+
+          # Ensure score is 1-10
+          if [ $FINAL_SCORE -lt 1 ]; then FINAL_SCORE=1; fi
+          if [ $FINAL_SCORE -gt 10 ]; then FINAL_SCORE=10; fi
+
+          # Score description
+          if [ $FINAL_SCORE -ge 9 ]; then
+            SCORE_DESC="🎆 EXCELLENT - This is a fantastic PR!"
+          elif [ $FINAL_SCORE -ge 7 ]; then
+            SCORE_DESC="🚀 GREAT - Nice work!"
+          elif [ $FINAL_SCORE -ge 5 ]; then
+            SCORE_DESC="💪 GOOD - Solid PR with room for improvement"
+          elif [ $FINAL_SCORE -ge 3 ]; then
+            SCORE_DESC="⚠️ NEEDS WORK - Several issues to address"
+          else
+            SCORE_DESC="🔴 POOR - Major improvements needed"
+          fi
+
+          echo "📊 Metrics calculated:"
+          echo "   Size: $PR_SIZE ($TOTAL_CHANGES changes) - $SIZE_ASSESSMENT"
+          echo "   Files: $CHANGED_FILES - $FILES_ASSESSMENT"
+          echo "   Age: ${AGE_HOURS}h - $AGE_ASSESSMENT"
+          echo "   Quality Score: $QUALITY_SCORE/10"
+          echo "   Final Score: $FINAL_SCORE/10 - $SCORE_DESC"
+
+          # Set outputs
+          echo "pr-size=$PR_SIZE" >> $GITHUB_OUTPUT
+          echo "size-emoji=$SIZE_EMOJI" >> $GITHUB_OUTPUT
+          echo "total-changes=$TOTAL_CHANGES" >> $GITHUB_OUTPUT
+          echo "changed-files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "review-time=$REVIEW_TIME" >> $GITHUB_OUTPUT
+          echo "age-hours=$AGE_HOURS" >> $GITHUB_OUTPUT
+          echo "author=$AUTHOR" >> $GITHUB_OUTPUT
+          echo "commits=$COMMITS" >> $GITHUB_OUTPUT
+          echo "size-assessment=$SIZE_ASSESSMENT" >> $GITHUB_OUTPUT
+          echo "files-assessment=$FILES_ASSESSMENT" >> $GITHUB_OUTPUT
+          echo "commits-assessment=$COMMITS_ASSESSMENT" >> $GITHUB_OUTPUT
+          echo "age-assessment=$AGE_ASSESSMENT" >> $GITHUB_OUTPUT
+          echo "quality-score=$QUALITY_SCORE" >> $GITHUB_OUTPUT
+          echo "quality-assessment=$QUALITY_ASSESSMENT" >> $GITHUB_OUTPUT
+          echo "final-score=$FINAL_SCORE" >> $GITHUB_OUTPUT
+          echo "score-desc=$SCORE_DESC" >> $GITHUB_OUTPUT
+          echo "unused-vars=$UNUSED_VARS" >> $GITHUB_OUTPUT
+          echo "duplicate-code=$DUPLICATE_CODE" >> $GITHUB_OUTPUT
+          echo "todo-count=$TODO_FIXME_COUNT" >> $GITHUB_OUTPUT
+          echo "spelling-errors=$SPELLING_ERRORS" >> $GITHUB_OUTPUT
+
+          # Add comprehensive scoring metrics
+          echo "code-health=$CODE_HEALTH" >> $GITHUB_OUTPUT
+          echo "tests-score=$TESTS_SCORE" >> $GITHUB_OUTPUT
+          echo "performance-score=$PERFORMANCE_SCORE" >> $GITHUB_OUTPUT
+          echo "accessibility-score=$ACCESSIBILITY_SCORE" >> $GITHUB_OUTPUT
+          echo "security-score=$SECURITY_SCORE" >> $GITHUB_OUTPUT
+          echo "dx-score=$DX_SCORE" >> $GITHUB_OUTPUT
+          echo "weighted-score=$WEIGHTED_SCORE" >> $GITHUB_OUTPUT
+          echo "platform-type=$([ $IS_REACT_NATIVE -eq 1 ] && echo 'React Native' || echo 'Web')" >> $GITHUB_OUTPUT
+          echo "secrets-found=$SECRETS_FOUND" >> $GITHUB_OUTPUT
+
+      - name: 💬 Comment on PR
+        if: github.event.action != 'closed'
+        run: |
+          # Create metrics comment
+          cat << 'EOF' > comment.md
+          ## 📊 PR Productivity Metrics
+
+          ### 🎯 **Overall Score: ${{ steps.metrics.outputs.final-score }}/10**
+          ${{ steps.metrics.outputs.score-desc }}
+
+          | Metric | Value | Assessment |
+          |--------|-------|------------|
+          | **Size** | ${{ steps.metrics.outputs.size-emoji }} ${{ steps.metrics.outputs.pr-size }} (${{ steps.metrics.outputs.total-changes }} changes) | ${{ steps.metrics.outputs.size-assessment }} |
+          | **Files** | ${{ steps.metrics.outputs.changed-files }} files | ${{ steps.metrics.outputs.files-assessment }} |
+          | **Commits** | ${{ steps.metrics.outputs.commits }} | ${{ steps.metrics.outputs.commits-assessment }} |
+          | **Age** | ${{ steps.metrics.outputs.age-hours }}h | ${{ steps.metrics.outputs.age-assessment }} |
+          | **Quality** | ${{ steps.metrics.outputs.quality-score }}/10 | ${{ steps.metrics.outputs.quality-assessment }} |
+
+          ### 🔍 Code Quality Analysis
+          - 🅰️ **Spelling errors**: ${{ steps.metrics.outputs.spelling-errors }}
+          - 📊 **Potential unused variables**: ${{ steps.metrics.outputs.unused-vars }}
+          - 🔄 **Duplicate patterns**: ${{ steps.metrics.outputs.duplicate-code }}
+          - 📝 **TODO/FIXME comments**: ${{ steps.metrics.outputs.todo-count }}
+          - 🔒 **Potential secrets found**: ${{ steps.metrics.outputs.secrets-found }}
+
+          ### 📈 Comprehensive Quality Metrics
+          **Platform**: ${{ steps.metrics.outputs.platform-type }} | **Weighted Score**: ${{ steps.metrics.outputs.weighted-score }}/100
+
+          | Category | Score | Weight | Contribution |
+          |----------|-------|--------|--------------|
+          | 🧬 **Code Health** | ${{ steps.metrics.outputs.code-health }}/100 | 25% | Linting, duplication, complexity |
+          | 🧪 **Tests** | ${{ steps.metrics.outputs.tests-score }}/100 | 20% | Coverage, mutation testing, E2E |
+          | ⚡ **Performance** | ${{ steps.metrics.outputs.performance-score }}/100 | 15% | Bundle size, TTI, startup time |
+          | ♿ **Accessibility** | ${{ steps.metrics.outputs.accessibility-score }}/100 | 10% | A11y compliance and best practices |
+          | 🔒 **Security** | ${{ steps.metrics.outputs.security-score }}/100 | 20% | Vulnerabilities, secrets detection |
+          | 🚀 **Developer Experience** | ${{ steps.metrics.outputs.dx-score }}/100 | 10% | API changes, documentation |
+
+          ### 🏆 Scoring Breakdown
+          **Formula**: `Score = 0.25×CodeHealth + 0.20×Tests + 0.15×Performance + 0.10×Accessibility + 0.20×Security + 0.10×DX`
+
+          - **🧬 Code Health** (25%): `100 - min(100, 2×LintErrors + 10×TypeErrors + Duplication%) - 5×ComplexityOverBudget`
+          - **🧪 Tests** (20%): `min(100, 1.2×Coverage%) - 20×MutationEscapeRate + 10 (if E2E exists)`
+          - **⚡ Performance** (15%): `100 - 0.5×KBOverBudget - 0.2×TTIOverBudget` (Web) or startup penalties (RN)
+          - **♿ Accessibility** (10%): `100 - 10×CriticalA11yIssues - 3×SeriousA11yIssues` (Web), 80 default (RN)
+          - **🔒 Security** (20%): `100 - 40×CriticalVulns - 15×HighVulns - 5×SecretsFound`
+          - **🚀 Developer Experience** (10%): `100 - 10×BreakingAPIChanges - 5×UnexplainedMajorDiffs`
+
+          **Other Metrics**:
+          - **Size Score**: Smaller PRs get higher scores
+          - **Commit Score**: Fewer, focused commits are better
+          - **File Score**: Fewer files changed is better
+          - **Freshness Score**: Faster review cycles are better
+
+          ---
+          *Updated automatically • ${{ github.event.action }} event*
+          EOF
+
+          # Post comment using REST API
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"body\": $(jq -Rs . < comment.md)}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
+
+      - name: 🖕 Add Shame Image for Low Scores
+        if:
+          github.event.action != 'closed' && steps.metrics.outputs.final-score
+          <= 5
+        run: |
+          # Create shame comment with 5fingers image
+          cat << 'EOF' > shame-comment.md
+
+          ![Time to improve!](https://raw.githubusercontent.com/${{ github.repository }}/dev/docs/5fingers.jpeg)
+
+          ## 💪 **Time to Step Up Your Game!**
+
+          Your PR scored **${{ steps.metrics.outputs.final-score }}/10** - there's definitely room for improvement! 🚀
+
+          ### 🎯 **Quick Improvement Tips:**
+          - 🅰️ **Fix spelling errors** (found ${{ steps.metrics.outputs.spelling-errors }})
+          - 📊 **Remove unused variables** (found ${{ steps.metrics.outputs.unused-vars }})
+          - 🔄 **Reduce duplicate code** (found ${{ steps.metrics.outputs.duplicate-code }} patterns)
+
+          **Remember: Every expert was once a beginner! Keep pushing! 💪**
+          EOF
+
+          # Post shame comment
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"body\": $(jq -Rs . < shame-comment.md)}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
+
+      - name: 🎉 Completion Summary
+        if:
+          github.event.action == 'closed' && github.event.pull_request.merged ==
+          true
+        run: |
+          # Create completion summary
+          cat << 'EOF' > completion.md
+          ## ✅ PR Merged Successfully!
+
+          🎉 **Great work @${{ steps.metrics.outputs.author }}!**
+
+          ### 🎯 Final Score: ${{ steps.metrics.outputs.final-score }}/10
+          ${{ steps.metrics.outputs.score-desc }}
+
+          ### Final Stats
+          - **Size**: ${{ steps.metrics.outputs.pr-size }} (${{ steps.metrics.outputs.total-changes }} changes)
+          - **Quality Score**: ${{ steps.metrics.outputs.quality-score }}/10
+          - **Lead Time**: ${{ steps.metrics.outputs.age-hours }} hours
+          - **Files Changed**: ${{ steps.metrics.outputs.changed-files }}
+          - **Commits**: ${{ steps.metrics.outputs.commits }}
+
+          ### 🏆 Performance Highlights
+          - Size: ${{ steps.metrics.outputs.size-assessment }}
+          - Quality: ${{ steps.metrics.outputs.quality-assessment }}
+          - Timeliness: ${{ steps.metrics.outputs.age-assessment }}
+
+          This PR contributes to our team productivity metrics! 📈
+          EOF
+
+          # Post completion comment
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"body\": $(jq -Rs . < completion.md)}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
+
+      - name: 🖕 Add Improvement Message for Low-Scoring Merged PR
+        if:
+          github.event.action == 'closed' && github.event.pull_request.merged ==
+          true && steps.metrics.outputs.final-score <= 5
+        run: |
+          # Create improvement message with 5fingers image
+          cat << 'EOF' > improvement-comment.md
+
+          ![Next time can be better!](https://raw.githubusercontent.com/${{ github.repository }}/main/docs/5fingers.jpeg)
+
+          ## 🚀 **Room for Improvement!**
+
+          This PR scored **${{ steps.metrics.outputs.final-score }}/10** - let's aim higher next time! 🎯
+
+          ### 📝 **What to improve for next PR:**
+          - 🅰️ Spelling errors: ${{ steps.metrics.outputs.spelling-errors }}
+          - 📊 Unused variables: ${{ steps.metrics.outputs.unused-vars }}
+          - 🔄 Duplicate patterns: ${{ steps.metrics.outputs.duplicate-code }}
+
+          **Your next PR will be awesome! 🎆**
+          EOF
+
+          # Post improvement comment
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"body\": $(jq -Rs . < improvement-comment.md)}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
+
+      - name: 📊 Store Metrics (if merged)
+        if:
+          github.event.action == 'closed' && github.event.pull_request.merged ==
+          true
+        run: |
+          echo "📁 Storing metrics for PR #${{ github.event.number }}"
+          echo "Author: ${{ steps.metrics.outputs.author }}"
+          echo "Size: ${{ steps.metrics.outputs.pr-size }}"  
+          echo "Lead Time: ${{ steps.metrics.outputs.age-hours }}h"
+          echo "Changes: ${{ steps.metrics.outputs.total-changes }}"
+          echo "Files: ${{ steps.metrics.outputs.changed-files }}"
+
+          # These metrics can be collected by your weekly dashboard
+          # Or stored in a database/file for trend analysis

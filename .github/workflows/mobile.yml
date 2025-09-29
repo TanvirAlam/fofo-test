@@ -1,0 +1,50 @@
+name: Mobile CI/CD
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - "apps/mobile/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+
+env:
+  NODE_VERSION: "18"
+  PNPM_VERSION: "9.0.0"
+
+jobs:
+  build-and-test:
+    name: 🏗️ Build & Test Mobile
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛒 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 Lint
+        run: pnpm --filter=mobile lint
+
+      - name: 🔍 Type check
+        run: pnpm --filter=mobile check-types
+
+      - name: 🏗️ Build
+        run: pnpm --filter=mobile build
+
+      - name: 🧪 Run tests
+        run: pnpm --filter=mobile test:ci
+        env:
+          NODE_ENV: test
+          CI: true

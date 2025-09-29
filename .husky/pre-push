@@ -1,0 +1,29 @@
+#!/bin/bash
+# Prevents force-pushing or pushing to protected branches
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+PROTECTED_BRANCHES="^(master|main|develop|release-*|patch-*)"
+
+IS_FORCE_PUSH=false
+for arg in "$@"; do
+  if [[ "$arg" == "--force" || "$arg" == "-f" ]]; then
+    IS_FORCE_PUSH=true
+  fi
+done
+
+if [[ "$(uname)" = "Linux" || "$(uname)" = "Darwin" ]]; then
+  PUSH_COMMAND=$(ps -ocommand= -p $PPID)
+fi
+
+# Block push if branch is protected
+if [[ "$BRANCH" =~ $PROTECTED_BRANCHES ]]; then
+  if [[ "$IS_FORCE_PUSH" == true ]]; then
+    echo "চু \"$BRANCH\" এ ধাক্কা দিতে পারে না, একটি শক্ত চড়!!তুমি আমার নিগ"
+  else
+    echo "চু \"$BRANCH\" এ ধাক্কা দিতে পারে না, একটি শক্ত চড়!!তুমি আমার নিগ"
+  fi
+  exit 1
+fi
+
+exit 0

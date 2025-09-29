@@ -1,0 +1,31 @@
+{
+  "name": "twilio-service",
+  "version": "1.0.0",
+  "description": "Twilio service for voice calls and SMS in Foodime",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint .",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm run clean && pnpm run build"
+  },
+  "keywords": ["twilio", "sms", "voice", "calls", "communication"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "twilio": "^5.6.1"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.0",
+    "eslint": "^9.27.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.1.6"
+  }
+}

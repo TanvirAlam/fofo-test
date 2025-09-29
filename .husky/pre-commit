@@ -1,0 +1,87 @@
+#!/usr/bin/env sh
+
+echo '🏗️👷 Running checks before committing 👷‍♂️🏗️'
+echo 'please be patient, this may take a while...'
+
+# 1) Run lint first
+echo "🔎 Running lint..."
+if ! pnpm run lint; then
+  echo "❌ Lint failed — aborting commit"
+  exit 1
+fi
+
+ # 2) Run tests
+ echo "🧪 Running tests..."
+ if ! pnpm run test; then
+   echo "❌ Tests failed — aborting commit"
+   exit 1
+ fi
+
+
+echo '🏗️👷 Styling and formatting your project before committing👷‍♂️🏗️'
+echo 'please be patient, this may take a while...'
+
+# Get all staged JS/TS files
+STAGED_JS_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|jsx|ts|tsx)$' || true)
+STAGED_JSON_MD_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(json|md|yml|yaml)$' || true)
+
+# Process JS/TS files
+if [ -n "$STAGED_JS_FILES" ]; then
+  echo '🎨 Formatting and linting staged JS/TS files...'
+  
+  for file in $STAGED_JS_FILES; do
+    echo "Processing: $file"
+    
+    # Format files
+    if npx prettier --write "$file" 2>/dev/null; then
+      echo "✅ Formatted: $file"
+    else
+      echo "⚠️  Could not format: $file (continuing...)"
+    fi
+    
+    # Find the appropriate directory for ESLint
+    if echo "$file" | grep -q "^apps/server/"; then
+      if [ -f "apps/server/eslint.config.mjs" ]; then
+        (cd apps/server && npx eslint --fix "../../$file" 2>/dev/null) || echo "⚠️  ESLint issues in $file"
+      fi
+    elif echo "$file" | grep -q "^apps/web/"; then
+      if [ -f "apps/web/eslint.config.mjs" ]; then
+        (cd apps/web && npx eslint --fix "../../$file" 2>/dev/null) || echo "⚠️  ESLint issues in $file"
+      fi
+    elif echo "$file" | grep -q "^apps/"; then
+      app_dir=$(echo "$file" | sed -E 's|^(apps/[^/]+).*|\1|')
+      if [ -f "$app_dir/eslint.config.mjs" ]; then
+        (cd "$app_dir" && npx eslint --fix "../../$file" 2>/dev/null) || echo "⚠️  ESLint issues in $file"
+      fi
+    elif echo "$file" | grep -q "^packages/"; then
+      pkg_dir=$(echo "$file" | sed -E 's|^(packages/[^/]+).*|\1|')
+      if [ -f "$pkg_dir/eslint.config.mjs" ]; then
+        (cd "$pkg_dir" && npx eslint --fix "../../$file" 2>/dev/null) || echo "⚠️  ESLint issues in $file"
+      else
+        # For packages without eslint config, use root prettier only
+        echo "ℹ️  No ESLint config found for $pkg_dir, skipping lint"
+      fi
+    fi
+    
+    # Re-stage the file
+    git add "$file"
+  done
+fi
+
+# Process JSON/MD files
+if [ -n "$STAGED_JSON_MD_FILES" ]; then
+  echo '🎨 Formatting staged JSON/MD files...'
+  
+  for file in $STAGED_JSON_MD_FILES; do
+    echo "Processing: $file"
+    if npx prettier --write "$file" 2>/dev/null; then
+      echo "✅ Formatted: $file"
+      git add "$file"
+    else
+      echo "⚠️  Could not format: $file (continuing...)"
+    fi
+  done
+fi
+
+echo '🎉 No error found: committing this now.... ✨🚀🏄‍♂️🍻'
+

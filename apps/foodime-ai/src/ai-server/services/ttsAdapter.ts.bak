@@ -1,0 +1,135 @@
+import { HfInference } from '@huggingface/inference';
+
+interface TTSResult {
+  success: boolean;
+  audioData?: ArrayBuffer;
+  sampleRate?: number;
+  error?: string;
+}
+
+class TTSAdapter {
+  private hfClient: HfInference | null = null;
+  private isInitialized = false;
+
+  constructor() {
+    if (process.env.HUGGINGFACE_API_KEY) {
+      this.hfClient = new HfInference(process.env.HUGGINGFACE_API_KEY);
+    }
+  }
+
+  async initialize(): Promise<void> {
+    if (this.isInitialized) return;
+
+    try {
+      if (!this.hfClient) {
+        throw new Error('HUGGINGFACE_API_KEY is not set');
+      }
+
+      // Test connection to Hugging Face
+      await this.hfClient.textToSpeech({
+        model: 'facebook/fastspeech2-en-ljspeech',
+        inputs: 'Test',
+      });
+
+      this.isInitialized = true;
+      console.log('✅ TTS Adapter initialized');
+    } catch (error) {
+      console.error('❌ Failed to initialize TTS:', error);
+      throw error;
+    }
+  }
+
+  async testVoice(provider: string, voiceId: string, text: string): Promise<TTSResult> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    try {
+      if (!this.hfClient) {
+        throw new Error('Hugging Face client not initialized');
+      }
+
+      let audioData: ArrayBuffer;
+      let sampleRate = 22050; // Default sample rate
+
+      switch (provider) {
+        case 'bark':
+          audioData = await this.hfClient.textToSpeech({
+            model: 'suno/bark',
+            inputs: text,
+            parameters: {
+              voice_preset: voiceId
+            }
+          });
+          sampleRate = 24000;
+          break;
+
+        case 'fastspeech2':
+          audioData = await this.hfClient.textToSpeech({
+            model: voiceId,
+            inputs: text
+          });
+          break;
+
+        default:
+          throw new Error(`Unsupported provider: ${provider}`);
+      }
+
+      return {
+        success: true,
+        audioData,
+        sampleRate
+      };
+
+    } catch (error) {
+      console.error('TTS test failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  }
+
+  getAvailableVoices(provider: string): Array<{id: string; name: string; language: string}> {
+    switch (provider) {
+      case 'bark':
+        return [
+          // English voices
+          { id: 'en_0', name: 'English Male 1', language: 'en' },
+          { id: 'en_1', name: 'English Female 1', language: 'en' },
+          { id: 'en_2', name: 'English Male 2', language: 'en' },
+          { id: 'en_3', name: 'English Female 2', language: 'en' },
+          // German voices
+          { id: 'de_0', name: 'German Male 1', language: 'de' },
+          { id: 'de_1', name: 'German Female 1', language: 'de' },
+          // Spanish voices
+          { id: 'es_0', name: 'Spanish Male 1', language: 'es' },
+          { id: 'es_1', name: 'Spanish Female 1', language: 'es' },
+          // French voices
+          { id: 'fr_0', name: 'French Male 1', language: 'fr' },
+          { id: 'fr_1', name: 'French Female 1', language: 'fr' }
+        ];
+
+      case 'fastspeech2':
+        return [
+          { id: 'facebook/fastspeech2-en-ljspeech', name: 'LJSpeech Female', language: 'en' }
+        ];
+
+      default:
+        return [];
+    }
+  }
+
+  getSupportedLanguages(provider: string): string[] {
+    switch (provider) {
+      case 'bark':
+        return ['en', 'de', 'es', 'fr', 'hi', 'it', 'ja', 'ko', 'pl', 'pt', 'ru', 'tr', 'zh'];
+      case 'fastspeech2':
+        return ['en'];
+      default:
+        return [];
+    }
+  }
+}
+
+export const ttsAdapter = new TTSAdapter();
